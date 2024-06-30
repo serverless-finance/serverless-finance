@@ -1,14 +1,39 @@
-# Welcome to your CDK TypeScript project
+# serverless-finance
 
-This is a blank project for CDK development with TypeScript.
+AWS serverless finance management.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Requirements
 
-## Useful commands
+AWS CDK:
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+```shell
+npm i -g cdk
+```
+
+## Getting started
+
+Install dependencies
+
+```shell
+npm i
+```
+
+Bootstrap CDK on Account (only required once)
+
+```shell
+cdk bootstrap
+```
+
+Deploy application
+
+```shell
+cdk deploy
+```
+
+## Cleanup
+
+Delete all resources deployed by CDK
+
+```shell
+cdk destroy
+```

@@ -7,12 +7,13 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "format:check": "prettier --check bin/ lib/",
-    "format:write": "prettier --write bin/ lib/",
-    "lint:check": "eslint bin/ lib/ --ext .ts",
-    "lint:fix": "eslint --fix bin/ lib/ -ext .ts"
+    "format:check": "prettier --check bin/ lib/ lambda/",
+    "format:write": "prettier --write bin/ lib/ lambda/",
+    "lint:check": "eslint bin/ lib/ lambda/ --ext .ts",
+    "lint:fix": "eslint --fix bin/ lib/ lambda/ -ext .ts"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.140",
     "@types/node": "20.14.2",
     "@types/source-map-support": "^0.5.10",
     "aws-cdk": "2.147.2",
