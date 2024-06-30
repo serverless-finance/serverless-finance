@@ -7,13 +7,22 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "cdk": "cdk"
+    "format:check": "prettier --check bin/ lib/",
+    "format:write": "prettier --write bin/ lib/",
+    "lint:check": "eslint bin/ lib/ --ext .ts",
+    "lint:fix": "eslint --fix bin/ lib/ -ext .ts"
   },
   "devDependencies": {
     "@types/node": "20.14.2",
+    "@types/source-map-support": "^0.5.10",
     "aws-cdk": "2.147.2",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.3.2",
     "ts-node": "^10.9.2",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "typescript-eslint": "^7.14.1"
   },
   "dependencies": {
     "aws-cdk-lib": "2.147.2",
