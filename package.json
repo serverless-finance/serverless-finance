@@ -7,6 +7,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "deploy": "npm run build && cdk deploy",
+    "diff": "npm run build && cdk diff",
     "format:check": "prettier --check bin/ lib/ lambda/",
     "format:write": "prettier --write bin/ lib/ lambda/",
     "lint:check": "eslint bin/ lib/ lambda/ --ext .ts",

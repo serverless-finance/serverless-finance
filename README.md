@@ -27,7 +27,7 @@ cdk bootstrap
 Deploy application
 
 ```shell
-cdk deploy
+npm run deploy
 ```
 
 ## Cleanup
