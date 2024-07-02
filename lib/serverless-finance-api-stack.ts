@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
-import { LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
+import { RestApi } from "aws-cdk-lib/aws-apigateway";
 import { ApiLambda } from "./lambda/api-lambda";
 
 export class ServerlessFinanceApiStack extends cdk.Stack {

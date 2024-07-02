@@ -4,10 +4,16 @@ import * as cdk from "aws-cdk-lib";
 import { ServerlessFinanceApiStack } from "../lib/serverless-finance-api-stack";
 import { Config } from "./config";
 import { Tags } from "aws-cdk-lib";
+import { ServerlessFinanceResourcesStack } from "../lib/serverless-finance-resources-stack";
 
 const config = new Config();
 
 const app = new cdk.App();
+
+// setup resources
+new ServerlessFinanceResourcesStack(app, "ServerlessFinanceResources");
+
+// setup backend
 new ServerlessFinanceApiStack(app, "ServerlessFinanceApi", {
   env: {
     region: config.region,
