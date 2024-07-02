@@ -1,8 +1,8 @@
 import { Construct } from "constructs";
 import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
 import { RemovalPolicy } from "aws-cdk-lib";
-import { Config } from "../../bin/config";
-import { DatabaseField } from "../../util/dynamodb/types";
+import { Config } from "../config";
+import { DatabaseField } from "../../common/dynamodb/types";
 
 export interface ServerlessFinanceDatabaseProps {
   tableName: string;

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { ServerlessFinanceApiStack } from "../lib/serverless-finance-api-stack";
+import { ServerlessFinanceApiStack } from "./stacks/serverless-finance-api-stack";
 import { Config } from "./config";
 import { Tags } from "aws-cdk-lib";
-import { ServerlessFinanceResourcesStack } from "../lib/serverless-finance-resources-stack";
+import { ServerlessFinanceResourcesStack } from "./stacks/serverless-finance-resources-stack";
 
 const config = new Config();
 

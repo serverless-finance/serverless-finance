@@ -2,17 +2,17 @@
   "name": "serverless-finance",
   "version": "0.1.0",
   "bin": {
-    "serverless-finance": "bin/serverless-finance.js"
+    "serverless-finance": "src/cdk/serverless-finance.js"
   },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "deploy": "npm run build && cdk deploy",
     "diff": "npm run build && cdk diff",
-    "format:check": "prettier --check bin/ lib/ lambda/",
-    "format:write": "prettier --write bin/ lib/ lambda/",
-    "lint:check": "eslint bin/ lib/ lambda/ --ext .ts",
-    "lint:fix": "eslint --fix bin/ lib/ lambda/ -ext .ts"
+    "format:check": "prettier --check src/",
+    "format:write": "prettier --write src/",
+    "lint:check": "eslint src/ --ext .ts",
+    "lint:fix": "eslint --fix src/ -ext .ts"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.140",

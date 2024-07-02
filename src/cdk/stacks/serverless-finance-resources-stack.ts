@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { ServerlessFinanceDatabase } from "./dynamodb/serverless-finance-dynamodb";
+import { ServerlessFinanceDatabase } from "../constructs/serverless-finance-dynamodb";
 
 export class ServerlessFinanceResourcesStack extends cdk.Stack {
   public readonly database: ServerlessFinanceDatabase;

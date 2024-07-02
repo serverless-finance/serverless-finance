@@ -1,7 +1,7 @@
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
-import { Config } from "../../bin/config";
+import { Config } from "../config";
 import { RemovalPolicy } from "aws-cdk-lib";
 import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 
@@ -29,7 +29,7 @@ export class ApiLambda extends Construct {
     this.lambda = new lambda.Function(this, id, {
       functionName: props.name,
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset(`./lambda/${props.lambda}`),
+      code: lambda.Code.fromAsset(`./src/lambda/${props.lambda}`),
       handler: "index.handler",
       logGroup: lambdaLogGroup,
     });
