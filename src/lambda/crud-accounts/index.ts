@@ -1,19 +1,21 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { errorResponse, objectResponse } from "../common/api";
 import { DatabaseField, DatabaseObject } from "../../common/dynamodb/types";
-import generateId from "../../common/id";
-import { DynamoDB } from "aws-sdk";
+import { generateId } from "../../common/id";
 import { TABLE_NAME } from "../../common/env";
-import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
-import PutItemInput = DocumentClient.PutItemInput;
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  PutCommandInput,
+} from "@aws-sdk/lib-dynamodb";
 
 interface CreateAccountBody {
   name: string;
 }
 
-const documentClient = new DynamoDB.DocumentClient({
-  apiVersion: "2012-08-10",
-});
+const ddbClient = new DynamoDBClient();
+const documentClient = DynamoDBDocumentClient.from(ddbClient);
 
 async function createAccount(
   body: CreateAccountBody
@@ -22,7 +24,7 @@ async function createAccount(
   const accountId = generateId();
   const createdAt = new Date().toISOString();
 
-  const insertParams: PutItemInput = {
+  const insertParams: PutCommandInput = {
     TableName: process.env[TABLE_NAME]!,
     Item: {
       [DatabaseField.PK]: `${DatabaseObject.Account}#${accountId}`,
@@ -35,7 +37,7 @@ async function createAccount(
   };
 
   try {
-    await documentClient.put(insertParams).promise();
+    await documentClient.send(new PutCommand(insertParams));
     return objectResponse(201, {
       id: accountId,
       name: body.name,

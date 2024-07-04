@@ -4,6 +4,7 @@ import { AuthorizationType, RestApi } from "aws-cdk-lib/aws-apigateway";
 import { ApiLambda } from "../constructs/api-lambda";
 import { TABLE_NAME } from "../../common/env";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
+import { AccountApiEndpoint } from "../constructs/apigateway/accounts";
 
 export interface ServerlessFinanceApiStackProps extends cdk.StackProps {
   databaseTable: Table;
@@ -13,7 +14,7 @@ export class ServerlessFinanceApiStack extends cdk.Stack {
   constructor(
     scope: Construct,
     id: string,
-    props?: ServerlessFinanceApiStackProps
+    props: ServerlessFinanceApiStackProps
   ) {
     super(scope, id, props);
 
@@ -22,21 +23,9 @@ export class ServerlessFinanceApiStack extends cdk.Stack {
       restApiName: "serverless-finance",
     });
 
-    const accountLambda = new ApiLambda(this, "AccountCRUD", {
-      lambda: "crud-accounts",
-      name: "crud-accounts",
-      memory: 256,
-      env: {
-        [TABLE_NAME]: props?.databaseTable.tableName,
-      },
-    });
-    // set permissions for lambda
-    props?.databaseTable.grantReadWriteData(accountLambda.lambda);
-
-    const accountsEndpoint = restApi.root.addResource("accounts");
-    accountsEndpoint.addMethod("POST", accountLambda.lambdaIntegration, {
-      apiKeyRequired: false,
-      authorizationType: AuthorizationType.NONE,
+    const accountsIntegration = new AccountApiEndpoint(this, "AccountApi", {
+      databaseTable: props.databaseTable,
+      apiGateway: restApi,
     });
   }
 }

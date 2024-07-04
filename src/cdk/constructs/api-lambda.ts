@@ -4,7 +4,7 @@ import { Config } from "../config";
 import { RemovalPolicy } from "aws-cdk-lib";
 import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Architecture, Runtime } from "aws-cdk-lib/aws-lambda";
 
 export interface ApiLambdaProps {
   lambda: string;
@@ -36,6 +36,7 @@ export class ApiLambda extends Construct {
       handler: "handler",
       logGroup: lambdaLogGroup,
       memorySize: props.memory || 128,
+      architecture: Architecture.ARM_64,
       environment: {
         ...props.env,
       },
