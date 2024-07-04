@@ -1,5 +1,5 @@
 interface Account {
-  id?: string;
+  id: string;
   name: string;
   createdAt: Date;
   data: object;

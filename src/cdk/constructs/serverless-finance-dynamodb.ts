@@ -1,8 +1,13 @@
 import { Construct } from "constructs";
-import { AttributeType, BillingMode, Table } from "aws-cdk-lib/aws-dynamodb";
+import {
+  AttributeType,
+  BillingMode,
+  ProjectionType,
+  Table,
+} from "aws-cdk-lib/aws-dynamodb";
 import { RemovalPolicy } from "aws-cdk-lib";
 import { Config } from "../config";
-import { DatabaseField } from "../../common/dynamodb/types";
+import { DatabaseField, GSI } from "../../common/dynamodb/types";
 
 export interface ServerlessFinanceDatabaseProps {
   tableName: string;
@@ -35,6 +40,19 @@ export class ServerlessFinanceDatabase extends Construct {
         name: DatabaseField.SK,
         type: AttributeType.STRING,
       },
+    });
+
+    this.table.addGlobalSecondaryIndex({
+      indexName: GSI.ByType,
+      partitionKey: {
+        name: DatabaseField.Type,
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: DatabaseField.PK,
+        type: AttributeType.STRING,
+      },
+      projectionType: ProjectionType.ALL,
     });
   }
 }

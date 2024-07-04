@@ -1,13 +1,25 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { errorResponse, objectResponse } from "../common/api";
-import { DatabaseField, DatabaseObject } from "../../common/dynamodb/types";
+import { arrayResponse, errorResponse, objectResponse } from "../common/api";
+import {
+  DatabaseField,
+  DatabaseObject,
+  GSI,
+} from "../../common/dynamodb/types";
 import { generateId } from "../../common/id";
 import { TABLE_NAME } from "../../common/env";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
+  ConditionalCheckFailedException,
+  DynamoDBClient,
+  ReturnValue,
+} from "@aws-sdk/client-dynamodb";
+import {
+  DeleteCommand,
+  DeleteCommandInput,
   DynamoDBDocumentClient,
   PutCommand,
   PutCommandInput,
+  QueryCommand,
+  QueryCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 
 interface CreateAccountBody {
@@ -16,6 +28,15 @@ interface CreateAccountBody {
 
 const ddbClient = new DynamoDBClient();
 const documentClient = DynamoDBDocumentClient.from(ddbClient);
+
+function ddbItemToAccount(item: Record<string, any>): Account {
+  return {
+    id: item[DatabaseField.PK],
+    name: item[DatabaseField.AccountName],
+    createdAt: item[DatabaseField.CreatedAt],
+    data: item[DatabaseField.Data],
+  };
+}
 
 async function createAccount(
   body: CreateAccountBody
@@ -51,10 +72,47 @@ async function createAccount(
 }
 
 // function updateAccount(body: object): APIGatewayProxyResult {}
-// function listAccount(): APIGatewayProxyResult {
-//   return arrayResponse(0, []);
-// }
-// function deleteAccount(body: object): APIGatewayProxyResult {}
+async function listAccount(): Promise<APIGatewayProxyResult> {
+  const queryParams: QueryCommandInput = {
+    TableName: process.env[TABLE_NAME]!,
+    IndexName: GSI.ByType,
+    KeyConditionExpression: `${DatabaseField.Type} = :typeVal`,
+    ExpressionAttributeValues: {
+      ":typeVal": DatabaseObject.Account,
+    },
+  };
+
+  const result = await documentClient.send(new QueryCommand(queryParams));
+
+  const accounts: Account[] = [];
+  for (const account of result.Items!) {
+    accounts.push(ddbItemToAccount(account));
+  }
+
+  return arrayResponse(200, accounts);
+}
+
+async function deleteAccount(id: string): Promise<APIGatewayProxyResult> {
+  const deleteParams: DeleteCommandInput = {
+    TableName: process.env[TABLE_NAME]!,
+    Key: {
+      [DatabaseField.PK]: `${DatabaseObject.Account}#${id}`,
+      [DatabaseField.SK]: `${DatabaseObject.Account}#${id}`,
+    },
+    ConditionExpression: `attribute_exists(${DatabaseField.PK})`,
+    ReturnValues: ReturnValue.ALL_OLD,
+  };
+
+  try {
+    const data = await documentClient.send(new DeleteCommand(deleteParams));
+    return objectResponse(200, ddbItemToAccount(data.Attributes!));
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) {
+      return errorResponse(404, `account with id ${id} not found.`, []);
+    }
+    return errorResponse(500, `${error}`, []);
+  }
+}
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -75,11 +133,11 @@ export const handler = async (
     // update account
     // return updateAccount(JSON.parse(event.body!));
     case "DELETE":
-    // delete account
-    // return deleteAccount(JSON.parse(event.body!));
+      // delete account
+      return deleteAccount(event.pathParameters!.id!);
     case "GET":
-    // get account
-    // return listAccount();
+      // get accounts
+      return listAccount();
     default:
       return {
         statusCode: 400,

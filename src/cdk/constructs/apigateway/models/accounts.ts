@@ -1,5 +1,6 @@
 import { Construct } from "constructs";
 import {
+  JsonSchema,
   JsonSchemaType,
   Model,
   RequestValidator,

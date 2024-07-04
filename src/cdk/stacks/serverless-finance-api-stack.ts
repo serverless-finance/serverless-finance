@@ -1,8 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { AuthorizationType, RestApi } from "aws-cdk-lib/aws-apigateway";
-import { ApiLambda } from "../constructs/api-lambda";
-import { TABLE_NAME } from "../../common/env";
+import { RestApi } from "aws-cdk-lib/aws-apigateway";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { AccountApiEndpoint } from "../constructs/apigateway/accounts";
 

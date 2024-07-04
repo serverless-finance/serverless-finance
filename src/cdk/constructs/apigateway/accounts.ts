@@ -2,7 +2,6 @@ import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import {
   LambdaIntegration,
-  RequestValidator,
   Resource,
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
@@ -38,6 +37,24 @@ export class AccountApiEndpoint extends Construct {
     });
   }
 
+  registerGetRoute(
+    scope: Construct,
+    apiResource: Resource,
+    apiGateway: RestApi,
+    lambda: ApiLambda
+  ) {
+    apiResource.addMethod("GET", lambda.lambdaIntegration);
+  }
+
+  registerDeleteRoute(
+    scope: Construct,
+    apiResource: Resource,
+    apiGateway: RestApi,
+    lambda: ApiLambda
+  ) {
+    apiResource.addMethod("DELETE", lambda.lambdaIntegration);
+  }
+
   constructor(scope: Construct, id: string, props: AccountApiEndpointProps) {
     super(scope, id);
 
@@ -59,6 +76,20 @@ export class AccountApiEndpoint extends Construct {
     this.registerCreateRoute(
       scope,
       accountsRoute,
+      props.apiGateway,
+      accountLambda
+    );
+    this.registerGetRoute(
+      scope,
+      accountsRoute,
+      props.apiGateway,
+      accountLambda
+    );
+
+    const accountsIdRoute = accountsRoute.addResource("{id}");
+    this.registerDeleteRoute(
+      scope,
+      accountsIdRoute,
       props.apiGateway,
       accountLambda
     );

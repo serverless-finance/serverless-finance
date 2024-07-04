@@ -7,11 +7,16 @@ enum DatabaseField {
   PK = "PK",
   SK = "SK",
   CreatedAt = "CreatedAt",
-  Type = "Type",
+  Type = "ObjectType",
   AccountName = "AccountName",
   AccountBalance = "AccountBalance",
+  Data = "Data",
   TransactionTimestamp = "TransactionTimestamp",
   TransactionVolume = "TransactionVolume",
 }
 
-export { DatabaseField, DatabaseObject };
+enum GSI {
+  ByType = "ByType",
+}
+
+export { DatabaseField, DatabaseObject, GSI };
