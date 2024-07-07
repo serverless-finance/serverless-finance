@@ -1,116 +1,63 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { arrayResponse, errorResponse, objectResponse } from "../common/api";
-import {
-  DatabaseField,
-  DatabaseObject,
-  GSI,
-} from "../../common/dynamodb/types";
-import { generateId } from "../../common/id";
 import { TABLE_NAME } from "../../common/env";
-import {
-  ConditionalCheckFailedException,
-  DynamoDBClient,
-  ReturnValue,
-} from "@aws-sdk/client-dynamodb";
-import {
-  DeleteCommand,
-  DeleteCommandInput,
-  DynamoDBDocumentClient,
-  PutCommand,
-  PutCommandInput,
-  QueryCommand,
-  QueryCommandInput,
-} from "@aws-sdk/lib-dynamodb";
+import { AccountMutable, AccountORM } from "../common/orm/account-orm";
+import { NotFoundError, ORMError } from "../common/orm/errors";
 
-interface CreateAccountBody {
-  name: string;
-}
-
-const ddbClient = new DynamoDBClient();
-const documentClient = DynamoDBDocumentClient.from(ddbClient);
-
-function ddbItemToAccount(item: Record<string, any>): Account {
-  return {
-    id: item[DatabaseField.PK],
-    name: item[DatabaseField.AccountName],
-    createdAt: item[DatabaseField.CreatedAt],
-    data: item[DatabaseField.Data],
-  };
-}
-
-async function createAccount(
-  body: CreateAccountBody
+async function createAccountHandler(
+  orm: AccountORM,
+  body: AccountMutable
 ): Promise<APIGatewayProxyResult> {
-  // create new id
-  const accountId = generateId();
-  const createdAt = new Date().toISOString();
-
-  const insertParams: PutCommandInput = {
-    TableName: process.env[TABLE_NAME]!,
-    Item: {
-      [DatabaseField.PK]: `${DatabaseObject.Account}#${accountId}`,
-      [DatabaseField.SK]: `${DatabaseObject.Account}#${accountId}`,
-      [DatabaseField.CreatedAt]: createdAt,
-      [DatabaseField.Type]: DatabaseObject.Account,
-      [DatabaseField.AccountName]: body.name,
-      [DatabaseField.AccountBalance]: 0.0,
-    },
-  };
-
   try {
-    await documentClient.send(new PutCommand(insertParams));
-    return objectResponse(201, {
-      id: accountId,
-      name: body.name,
-      createdAt,
-      balance: 0.0,
-    });
+    const createdAccount = await orm.create(body);
+    return objectResponse(201, createdAccount);
   } catch (error) {
     console.error(error);
-    return errorResponse(500, "failed to create account", []);
+    return errorResponse(500, "failed to create account", [error as ORMError]);
   }
 }
 
 // function updateAccount(body: object): APIGatewayProxyResult {}
-async function listAccount(): Promise<APIGatewayProxyResult> {
-  const queryParams: QueryCommandInput = {
-    TableName: process.env[TABLE_NAME]!,
-    IndexName: GSI.ByType,
-    KeyConditionExpression: `${DatabaseField.Type} = :typeVal`,
-    ExpressionAttributeValues: {
-      ":typeVal": DatabaseObject.Account,
-    },
-  };
-
-  const result = await documentClient.send(new QueryCommand(queryParams));
-
-  const accounts: Account[] = [];
-  for (const account of result.Items!) {
-    accounts.push(ddbItemToAccount(account));
+async function listAccountHandler(
+  orm: AccountORM
+): Promise<APIGatewayProxyResult> {
+  try {
+    const accounts = await orm.getAll();
+    return arrayResponse(200, accounts);
+  } catch (error) {
+    console.error(error);
+    return errorResponse(500, "failed to list accounts", [error as ORMError]);
   }
-
-  return arrayResponse(200, accounts);
 }
 
-async function deleteAccount(id: string): Promise<APIGatewayProxyResult> {
-  const deleteParams: DeleteCommandInput = {
-    TableName: process.env[TABLE_NAME]!,
-    Key: {
-      [DatabaseField.PK]: `${DatabaseObject.Account}#${id}`,
-      [DatabaseField.SK]: `${DatabaseObject.Account}#${id}`,
-    },
-    ConditionExpression: `attribute_exists(${DatabaseField.PK})`,
-    ReturnValues: ReturnValue.ALL_OLD,
-  };
-
+async function deleteAccountHandler(
+  orm: AccountORM,
+  id: string
+): Promise<APIGatewayProxyResult> {
   try {
-    const data = await documentClient.send(new DeleteCommand(deleteParams));
-    return objectResponse(200, ddbItemToAccount(data.Attributes!));
+    const deletedAccount = await orm.delete(id);
+    return objectResponse(200, deletedAccount);
   } catch (error) {
-    if (error instanceof ConditionalCheckFailedException) {
-      return errorResponse(404, `account with id ${id} not found.`, []);
+    if (error instanceof NotFoundError) {
+      return errorResponse(404, `account with id ${id} not found.`, [error]);
     }
-    return errorResponse(500, `${error}`, []);
+    return errorResponse(500, `${error}`, [error as ORMError]);
+  }
+}
+
+async function updateAccountsHandler(
+  orm: AccountORM,
+  id: string,
+  update: AccountMutable
+): Promise<APIGatewayProxyResult> {
+  try {
+    const updatedAccount = await orm.put(id, update);
+    return objectResponse(200, updatedAccount);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return errorResponse(404, `account with id ${id} not found.`, [error]);
+    }
+    return errorResponse(500, `${error}`, [error as ORMError]);
   }
 }
 
@@ -125,19 +72,25 @@ export const handler = async (
     throw new Error(`${TABLE_NAME} environment variable doesn't exist`);
   }
 
+  const accountORM = new AccountORM(process.env[TABLE_NAME]!);
+
   switch (event.httpMethod) {
     case "POST":
       // create account
-      return await createAccount(JSON.parse(event.body!));
+      return await createAccountHandler(accountORM, JSON.parse(event.body!));
     case "PUT":
-    // update account
-    // return updateAccount(JSON.parse(event.body!));
+      // update account
+      return updateAccountsHandler(
+        accountORM,
+        event.pathParameters!.id!,
+        JSON.parse(event.body!)
+      );
     case "DELETE":
       // delete account
-      return deleteAccount(event.pathParameters!.id!);
+      return deleteAccountHandler(accountORM, event.pathParameters!.id!);
     case "GET":
       // get accounts
-      return listAccount();
+      return listAccountHandler(accountORM);
     default:
       return {
         statusCode: 400,
