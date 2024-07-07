@@ -1,11 +1,5 @@
 import { Construct } from "constructs";
-import {
-  JsonSchema,
-  JsonSchemaType,
-  Model,
-  RequestValidator,
-  RestApi,
-} from "aws-cdk-lib/aws-apigateway";
+import { JsonSchema, JsonSchemaType, Model, RequestValidator, RestApi } from "aws-cdk-lib/aws-apigateway";
 
 interface AccountModelProps {
   restApi: RestApi;
@@ -52,24 +46,16 @@ export class AccountModel extends Construct {
       },
     });
 
-    this.createRequestValidator = new RequestValidator(
-      scope,
-      `${createBodyName}Validator`,
-      {
-        restApi: props.restApi,
-        requestValidatorName: `${createBodyName}Validator`,
-        validateRequestBody: true,
-      }
-    );
+    this.createRequestValidator = new RequestValidator(scope, `${createBodyName}Validator`, {
+      restApi: props.restApi,
+      requestValidatorName: `${createBodyName}Validator`,
+      validateRequestBody: true,
+    });
 
-    this.updateRequestValidator = new RequestValidator(
-      scope,
-      `${updateBodyName}Validator`,
-      {
-        restApi: props.restApi,
-        requestValidatorName: `${updateBodyName}Validator`,
-        validateRequestBody: true,
-      }
-    );
+    this.updateRequestValidator = new RequestValidator(scope, `${updateBodyName}Validator`, {
+      restApi: props.restApi,
+      requestValidatorName: `${updateBodyName}Validator`,
+      validateRequestBody: true,
+    });
   }
 }

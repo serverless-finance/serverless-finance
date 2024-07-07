@@ -9,11 +9,7 @@ export interface ServerlessFinanceApiStackProps extends cdk.StackProps {
 }
 
 export class ServerlessFinanceApiStack extends cdk.Stack {
-  constructor(
-    scope: Construct,
-    id: string,
-    props: ServerlessFinanceApiStackProps
-  ) {
+  constructor(scope: Construct, id: string, props: ServerlessFinanceApiStackProps) {
     super(scope, id, props);
 
     // create rest api

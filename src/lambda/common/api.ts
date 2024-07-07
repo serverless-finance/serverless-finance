@@ -24,11 +24,7 @@ function formatError(error: Error) {
  * @example
  * createPaginatedData(request, 1, 10, [{ id: 1 }])
  */
-function createPaginatedData(
-  startIndex: number,
-  totalItems: number,
-  data: object[]
-) {
+function createPaginatedData(startIndex: number, totalItems: number, data: object[]) {
   return {
     apiVersion: 1,
     data: {
@@ -40,11 +36,7 @@ function createPaginatedData(
   };
 }
 
-function errorResponse(
-  code: number,
-  message: string,
-  errors: Error[]
-): APIGatewayProxyResult {
+function errorResponse(code: number, message: string, errors: Error[]): APIGatewayProxyResult {
   const errorObjects = [];
   if (errors.length > 0) {
     // format errors to object

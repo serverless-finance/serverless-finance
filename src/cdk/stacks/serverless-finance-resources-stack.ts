@@ -9,12 +9,8 @@ export class ServerlessFinanceResourcesStack extends cdk.Stack {
     super(scope, id, props);
 
     // setup dynamodb
-    this.database = new ServerlessFinanceDatabase(
-      this,
-      "ServerlessFinanceDatabase",
-      {
-        tableName: "ServerlessFinanceDatabase",
-      }
-    );
+    this.database = new ServerlessFinanceDatabase(this, "ServerlessFinanceDatabase", {
+      tableName: "ServerlessFinanceDatabase",
+    });
   }
 }

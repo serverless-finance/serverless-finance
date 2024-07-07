@@ -11,10 +11,7 @@ const config = new Config();
 const app = new cdk.App();
 
 // setup resources
-const resourceStack = new ServerlessFinanceResourcesStack(
-  app,
-  "ServerlessFinanceResources"
-);
+const resourceStack = new ServerlessFinanceResourcesStack(app, "ServerlessFinanceResources");
 
 // setup backend
 new ServerlessFinanceApiStack(app, "ServerlessFinanceApi", {
