@@ -5,7 +5,6 @@ import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { ApiLambda } from "../api-lambda";
 import { TABLE_NAME } from "../../../common/env";
 import { AccountModel } from "./models/accounts";
-import { Config } from "../../config";
 
 export interface AccountApiEndpointProps {
   databaseTable: Table;

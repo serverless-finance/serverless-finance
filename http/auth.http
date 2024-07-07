@@ -1,0 +1,20 @@
+### Authenticate on AWS Cognitor
+
+// @no-log
+POST https://cognito-idp.{{region}}.amazonaws.com/
+Content-Type: application/x-amz-json-1.1
+X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth
+
+{
+  "AuthFlow": "USER_PASSWORD_AUTH",
+  "ClientId": "{{cognito_user_pool_client}}",
+  "AuthParameters": {
+        "USERNAME": "{{cognito_user}}",
+        "PASSWORD": "{{cognito_password}}"
+  }
+}
+
+> {%
+  client.global.set("cognito_access_token", response.body.AuthenticationResult.IdToken);
+  client.global.set("cognito_token_type", response.body.AuthenticationResult.TokenType);
+%}

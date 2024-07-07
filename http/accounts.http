@@ -1,0 +1,4 @@
+### List all accounts
+
+GET {{api_url}}/accounts
+Authorization: {{cognito_token_type}} {{cognito_access_token}}
