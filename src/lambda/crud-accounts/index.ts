@@ -3,6 +3,9 @@ import { arrayResponse, errorResponse, objectResponse } from "../common/api";
 import { TABLE_NAME } from "../../common/env";
 import { AccountMutable, AccountORM } from "../common/orm/account-orm";
 import { NotFoundError, ORMError } from "../common/orm/errors";
+import { Logger } from "@aws-lambda-powertools/logger";
+
+const logger = new Logger();
 
 async function createAccountHandler(
   orm: AccountORM,
@@ -10,9 +13,13 @@ async function createAccountHandler(
 ): Promise<APIGatewayProxyResult> {
   try {
     const createdAccount = await orm.create(body);
+
+    logger.debug(`created new account ${createdAccount.id}`, {
+      data: createdAccount,
+    });
     return objectResponse(201, createdAccount);
   } catch (error) {
-    console.error(error);
+    logger.error("failed to create account", error as Error);
     return errorResponse(500, "failed to create account", [error as ORMError]);
   }
 }
@@ -25,7 +32,7 @@ async function listAccountHandler(
     const accounts = await orm.getAll();
     return arrayResponse(200, accounts);
   } catch (error) {
-    console.error(error);
+    logger.error("failed to list accounts", error as Error);
     return errorResponse(500, "failed to list accounts", [error as ORMError]);
   }
 }
@@ -36,8 +43,13 @@ async function deleteAccountHandler(
 ): Promise<APIGatewayProxyResult> {
   try {
     const deletedAccount = await orm.delete(id);
+
+    logger.debug(`deleted account ${id}`, { data: deletedAccount });
+
     return objectResponse(200, deletedAccount);
   } catch (error) {
+    logger.error(`failed to delete account ${id}`, error as Error);
+
     if (error instanceof NotFoundError) {
       return errorResponse(404, `account with id ${id} not found.`, [error]);
     }
@@ -52,8 +64,13 @@ async function updateAccountsHandler(
 ): Promise<APIGatewayProxyResult> {
   try {
     const updatedAccount = await orm.put(id, update);
+
+    logger.debug(`deleted account ${id}`, { data: updatedAccount });
+
     return objectResponse(200, updatedAccount);
   } catch (error) {
+    logger.error(`failed to update account ${id}`, error as Error);
+
     if (error instanceof NotFoundError) {
       return errorResponse(404, `account with id ${id} not found.`, [error]);
     }
@@ -69,10 +86,15 @@ export const handler = async (
   }
 
   if (!process.env[TABLE_NAME]) {
-    throw new Error(`${TABLE_NAME} environment variable doesn't exist`);
+    throw new Error(`${TABLE_NAME} environment variable does not exist`);
   }
 
+  logger.debug(`using dynamodb table ${process.env[TABLE_NAME]}`);
+
   const accountORM = new AccountORM(process.env[TABLE_NAME]!);
+
+  logger.debug("event body", { data: event.body });
+  logger.debug("event path params", { data: event.pathParameters });
 
   switch (event.httpMethod) {
     case "POST":
@@ -92,6 +114,8 @@ export const handler = async (
       // get accounts
       return listAccountHandler(accountORM);
     default:
+      logger.error("method did not match");
+
       return {
         statusCode: 400,
         headers: { "Content-Type": "application/json" },
