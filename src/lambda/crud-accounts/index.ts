@@ -4,6 +4,10 @@ import { TABLE_NAME } from "../../common/env";
 import { AccountMutable, AccountORM } from "../common/orm/account-orm";
 import { NotFoundError, ORMError } from "../common/orm/errors";
 import { Logger } from "@aws-lambda-powertools/logger";
+import {
+  extractDataFromEnvelope,
+  API_GATEWAY_REST,
+} from "@aws-lambda-powertools/jmespath/envelopes";
 
 const logger = new Logger();
 
@@ -99,13 +103,21 @@ export const handler = async (
   switch (event.httpMethod) {
     case "POST":
       // create account
-      return await createAccountHandler(accountORM, JSON.parse(event.body!));
+      const data = extractDataFromEnvelope<AccountMutable>(
+        event,
+        API_GATEWAY_REST
+      );
+      return await createAccountHandler(accountORM, data);
     case "PUT":
       // update account
+      const update = extractDataFromEnvelope<AccountMutable>(
+        event,
+        API_GATEWAY_REST
+      );
       return updateAccountsHandler(
         accountORM,
         event.pathParameters!.id!,
-        JSON.parse(event.body!)
+        update
       );
     case "DELETE":
       // delete account
