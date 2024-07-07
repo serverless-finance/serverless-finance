@@ -25,8 +25,7 @@ export class ApiLambda extends Construct {
     const lambdaLogGroup = new LogGroup(this, `${id}LogGroup`, {
       logGroupName: `/aws/lambda/${props.name}`,
       retention: RetentionDays.ONE_WEEK,
-      removalPolicy:
-        config.env == "dev" ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
+      removalPolicy: config.env == "dev" ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
     });
 
     this.lambda = new NodejsFunction(this, id, {
@@ -39,6 +38,8 @@ export class ApiLambda extends Construct {
       architecture: Architecture.ARM_64,
       environment: {
         ...props.env,
+        POWERTOOLS_LOG_LEVEL: config.env == "dev" ? "DEBUG" : "INFO",
+        POWERTOOLS_SERVICE_NAME: props.name,
       },
       bundling: {
         minify: true,

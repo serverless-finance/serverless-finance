@@ -1,11 +1,17 @@
 class ORMError extends Error {
-  cause: any;
+  public readonly cause: any;
+  public readonly type: string;
 
   constructor(type: string, message: string, cause?: any) {
     super(`${type}: ${message}`);
 
+    this.type = type;
+
     if (cause) {
       this.cause = cause;
+      if (cause instanceof Error) {
+        this.stack += cause.stack ? cause.stack : cause.message;
+      }
     }
   }
 }

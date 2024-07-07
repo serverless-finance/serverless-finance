@@ -13,7 +13,9 @@ interface AccountModelProps {
 
 export class AccountModel extends Construct {
   public readonly createBodyModel: Model;
+  public readonly updateBodyModel: Model;
   public readonly createRequestValidator: RequestValidator;
+  public readonly updateRequestValidator: RequestValidator;
 
   constructor(scope: Construct, id: string, props: AccountModelProps) {
     super(scope, id);
@@ -23,7 +25,23 @@ export class AccountModel extends Construct {
       restApi: props.restApi,
       contentType: "application/json",
       description: "Create account",
-      modelName: "AccountCreateBody",
+      modelName: createBodyName,
+      schema: {
+        type: JsonSchemaType.OBJECT,
+        required: ["name"],
+        properties: {
+          name: { type: JsonSchemaType.STRING },
+        },
+        additionalProperties: false,
+      },
+    });
+
+    const updateBodyName = "AccountUpdateBody";
+    this.updateBodyModel = new Model(this, `${updateBodyName}Model`, {
+      restApi: props.restApi,
+      contentType: "application/json",
+      description: "Update account",
+      modelName: updateBodyName,
       schema: {
         type: JsonSchemaType.OBJECT,
         required: ["name"],
@@ -40,6 +58,16 @@ export class AccountModel extends Construct {
       {
         restApi: props.restApi,
         requestValidatorName: `${createBodyName}Validator`,
+        validateRequestBody: true,
+      }
+    );
+
+    this.updateRequestValidator = new RequestValidator(
+      scope,
+      `${updateBodyName}Validator`,
+      {
+        restApi: props.restApi,
+        requestValidatorName: `${updateBodyName}Validator`,
         validateRequestBody: true,
       }
     );

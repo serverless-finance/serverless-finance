@@ -4,17 +4,11 @@ import { TABLE_NAME } from "../../common/env";
 import { AccountMutable, AccountORM } from "../common/orm/account-orm";
 import { NotFoundError, ORMError } from "../common/orm/errors";
 import { Logger } from "@aws-lambda-powertools/logger";
-import {
-  extractDataFromEnvelope,
-  API_GATEWAY_REST,
-} from "@aws-lambda-powertools/jmespath/envelopes";
+import { extractDataFromEnvelope, API_GATEWAY_REST } from "@aws-lambda-powertools/jmespath/envelopes";
 
 const logger = new Logger();
 
-async function createAccountHandler(
-  orm: AccountORM,
-  body: AccountMutable
-): Promise<APIGatewayProxyResult> {
+async function createAccountHandler(orm: AccountORM, body: AccountMutable): Promise<APIGatewayProxyResult> {
   try {
     const createdAccount = await orm.create(body);
 
@@ -29,9 +23,7 @@ async function createAccountHandler(
 }
 
 // function updateAccount(body: object): APIGatewayProxyResult {}
-async function listAccountHandler(
-  orm: AccountORM
-): Promise<APIGatewayProxyResult> {
+async function listAccountHandler(orm: AccountORM): Promise<APIGatewayProxyResult> {
   try {
     const accounts = await orm.getAll();
     return arrayResponse(200, accounts);
@@ -41,10 +33,7 @@ async function listAccountHandler(
   }
 }
 
-async function deleteAccountHandler(
-  orm: AccountORM,
-  id: string
-): Promise<APIGatewayProxyResult> {
+async function deleteAccountHandler(orm: AccountORM, id: string): Promise<APIGatewayProxyResult> {
   try {
     const deletedAccount = await orm.delete(id);
 
@@ -82,9 +71,7 @@ async function updateAccountsHandler(
   }
 }
 
-export const handler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (event.httpMethod in ["POST", "PUT", "DELETE"] && !event.body) {
     throw new Error("Empty event body");
   }
@@ -103,22 +90,12 @@ export const handler = async (
   switch (event.httpMethod) {
     case "POST":
       // create account
-      const data = extractDataFromEnvelope<AccountMutable>(
-        event,
-        API_GATEWAY_REST
-      );
+      const data = extractDataFromEnvelope<AccountMutable>(event, API_GATEWAY_REST);
       return await createAccountHandler(accountORM, data);
     case "PUT":
       // update account
-      const update = extractDataFromEnvelope<AccountMutable>(
-        event,
-        API_GATEWAY_REST
-      );
-      return updateAccountsHandler(
-        accountORM,
-        event.pathParameters!.id!,
-        update
-      );
+      const update = extractDataFromEnvelope<AccountMutable>(event, API_GATEWAY_REST);
+      return updateAccountsHandler(accountORM, event.pathParameters!.id!, update);
     case "DELETE":
       // delete account
       return deleteAccountHandler(accountORM, event.pathParameters!.id!);

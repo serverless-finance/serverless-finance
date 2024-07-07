@@ -1,8 +1,4 @@
-import {
-  ConditionalCheckFailedException,
-  DynamoDBClient,
-  ReturnValue,
-} from "@aws-sdk/client-dynamodb";
+import { ConditionalCheckFailedException, DynamoDBClient, ReturnValue } from "@aws-sdk/client-dynamodb";
 import {
   DeleteCommand,
   DeleteCommandInput,
@@ -16,11 +12,7 @@ import {
   UpdateCommand,
   UpdateCommandInput,
 } from "@aws-sdk/lib-dynamodb";
-import {
-  DatabaseField,
-  DatabaseObject,
-  GSI,
-} from "../../../common/dynamodb/types";
+import { DatabaseField, DatabaseObject, GSI } from "../../../common/dynamodb/types";
 import { NotFoundError, ORMError } from "./errors";
 import { generateId } from "../../../common/id";
 
@@ -81,13 +73,7 @@ class AccountORM {
 
       return this.ddbItemToAccount(result.Item);
     } catch (error) {
-      return Promise.reject(
-        new ORMError(
-          DatabaseObject.Account,
-          "error while getting account",
-          error
-        )
-      );
+      return Promise.reject(new ORMError(DatabaseObject.Account, "error while getting account", error));
     }
   }
 
@@ -102,9 +88,7 @@ class AccountORM {
     };
 
     try {
-      const result = await this.documentClient.send(
-        new QueryCommand(queryParams)
-      );
+      const result = await this.documentClient.send(new QueryCommand(queryParams));
 
       if (!result.Items) {
         // not items returned
@@ -113,53 +97,40 @@ class AccountORM {
 
       return result.Items.map((r) => this.ddbItemToAccount(r));
     } catch (error) {
-      return Promise.reject(
-        new ORMError(
-          DatabaseObject.Account,
-          "error while getting account",
-          error
-        )
-      );
+      return Promise.reject(new ORMError(DatabaseObject.Account, "error while getting account", error));
     }
   }
 
   public async create(data: AccountMutable): Promise<Account> {
     // create new id
     const accountId = generateId();
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date();
 
     const putParams: PutCommandInput = {
       TableName: this.table,
       Item: {
         [DatabaseField.PK]: `${DatabaseObject.Account}#${accountId}`,
         [DatabaseField.SK]: `${DatabaseObject.Account}#${accountId}`,
-        [DatabaseField.CreatedAt]: createdAt,
+        [DatabaseField.CreatedAt]: createdAt.toISOString(),
         [DatabaseField.Type]: DatabaseObject.Account,
         [DatabaseField.AccountName]: data.name,
         [DatabaseField.Data]: data.data,
         [DatabaseField.AccountBalance]: 0.0,
       },
-      ReturnValues: "ALL_NEW",
     };
 
     try {
-      const result = await this.documentClient.send(new PutCommand(putParams));
+      await this.documentClient.send(new PutCommand(putParams));
 
-      if (!result.Attributes) {
-        return Promise.reject(
-          new ORMError(DatabaseObject.Account, "error while creating account")
-        );
-      }
-
-      return this.ddbItemToAccount(result.Attributes);
+      return {
+        id: accountId,
+        name: data.name,
+        createdAt: createdAt,
+        data: data.data,
+        balance: 0.0,
+      };
     } catch (error) {
-      return Promise.reject(
-        new ORMError(
-          DatabaseObject.Account,
-          "error while creating account",
-          error
-        )
-      );
+      return Promise.reject(new ORMError(DatabaseObject.Account, "error while creating account", error));
     }
   }
 
@@ -175,17 +146,10 @@ class AccountORM {
     };
 
     try {
-      const result = await this.documentClient.send(
-        new DeleteCommand(deleteParams)
-      );
+      const result = await this.documentClient.send(new DeleteCommand(deleteParams));
 
       if (!result.Attributes) {
-        return Promise.reject(
-          new ORMError(
-            DatabaseObject.Account,
-            `error while deleting account ${id}`
-          )
-        );
+        return Promise.reject(new ORMError(DatabaseObject.Account, `error while deleting account ${id}`));
       }
 
       return this.ddbItemToAccount(result.Attributes);
@@ -195,13 +159,7 @@ class AccountORM {
         return Promise.reject(new NotFoundError(DatabaseObject.Account, id));
       }
 
-      return Promise.reject(
-        new ORMError(
-          DatabaseObject.Account,
-          `error while deleting account ${id}`,
-          error
-        )
-      );
+      return Promise.reject(new ORMError(DatabaseObject.Account, `error while deleting account ${id}`, error));
     }
   }
 
@@ -211,9 +169,7 @@ class AccountORM {
     const expressionValues: Record<string, any> = {};
 
     for (const field of Object.keys(data)) {
-      updateExpressionComponents.push(
-        `${AccountFieldMapping[field as keyof AccountMutable]} = :${field}`
-      );
+      updateExpressionComponents.push(`${AccountFieldMapping[field as keyof AccountMutable]} = :${field}`);
 
       expressionValues[`:${field}`] = data[field as keyof AccountMutable];
     }
@@ -230,17 +186,10 @@ class AccountORM {
     };
 
     try {
-      const result = await this.documentClient.send(
-        new UpdateCommand(updateParams)
-      );
+      const result = await this.documentClient.send(new UpdateCommand(updateParams));
 
       if (!result.Attributes) {
-        return Promise.reject(
-          new ORMError(
-            DatabaseObject.Account,
-            `error while updating account ${id}`
-          )
-        );
+        return Promise.reject(new ORMError(DatabaseObject.Account, `error while updating account ${id}`));
       }
 
       return this.ddbItemToAccount(result.Attributes);
@@ -250,13 +199,7 @@ class AccountORM {
         return Promise.reject(new NotFoundError(DatabaseObject.Account, id));
       }
 
-      return Promise.reject(
-        new ORMError(
-          DatabaseObject.Account,
-          `error while updating account ${id}`,
-          error
-        )
-      );
+      return Promise.reject(new ORMError(DatabaseObject.Account, `error while updating account ${id}`, error));
     }
   }
 }
