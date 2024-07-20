@@ -10,7 +10,9 @@ const logger = new Logger();
 
 async function createAccountHandler(orm: AccountORM, body: AccountMutable): Promise<APIGatewayProxyResult> {
   try {
-    const createdAccount = await orm.create(body);
+    const createdAccount = await orm.create(body, {
+      balance: 0,
+    });
 
     logger.debug(`created new account ${createdAccount.id}`, {
       data: createdAccount,

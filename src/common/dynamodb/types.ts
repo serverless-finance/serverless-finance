@@ -13,6 +13,7 @@ enum DatabaseField {
   Data = "Data",
   TransactionTimestamp = "TransactionTimestamp",
   TransactionVolume = "TransactionVolume",
+  TransactionTitle = "TransactionTitle",
 }
 
 enum GSI {
