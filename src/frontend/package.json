@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/",
-    "lint:fix": "eslint --fix src/"
+    "lint:fix": "eslint --fix src/",
+    "prepare": "node .husky/install.mjs"
   },
   "dependencies": {
     "vue": "^3.4.29"
@@ -21,6 +22,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-vue": "^9.27.0",
     "globals": "^15.8.0",
+    "husky": "^9.1.1",
     "prettier": "^3.3.3",
     "vite": "^5.3.1"
   }
